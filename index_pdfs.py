@@ -3,43 +3,43 @@ import re
 from pypdf import PdfReader
 from database import KnowledgeBase
 
-archivos_pdf = Path("data").glob("*.pdf")
+pdf_files = list(Path("data").glob("*.pdf"))
+if not pdf_files:
+    print("⚠️ No se encontraron archivos PDF en la carpeta 'data'.")
+    raise SystemExit(1)
+
 chunks = []
-metadatas = []
+metadata_entries = []
 
-for archivo in archivos_pdf:
-    reader = PdfReader(archivo)
-    texto_completo = ""
-    chunks_archivo = 0
+for pdf_file in pdf_files:
+    reader = PdfReader(pdf_file)
+    full_text = ""
 
-    for pagina in reader.pages:
-        texto = pagina.extract_text()
-        if texto:
-            texto_completo += texto + "\n"
+    for page in reader.pages:
+        page_text = page.extract_text()
+        if page_text:
+            full_text += page_text + "\n"
 
-    if re.search(r"[IVXLCDM]+\.\d+", texto_completo):
-        partes = re.split(r"([IVXLCDM]+\.\d+)", texto_completo)
-    elif "Artículo" in texto_completo:
-        partes = re.split(r"(Artículo\s+\d+º?[^\n-]*)", texto_completo)
+    if re.search(r"[IVXLCDM]+\.\d+", full_text):
+        section_parts = re.split(r"([IVXLCDM]+\.\d+)", full_text)
+    elif "Artículo" in full_text:
+        section_parts = re.split(r"(Artículo\s+\d+º?[^\n-]*)", full_text)
     else:
-        print(f"{archivo.name}: {chunks_archivo} chunks")
         continue
 
-    for i in range(1, len(partes), 2):
-        titulo = partes[i]
-        contenido = partes[i + 1].strip()
-        chunks.append(f"{titulo}\n{contenido}")
-        metadatas.append({"archivo": archivo.name, "seccion": titulo.strip()})
-        chunks_archivo += 1
+    for part_index in range(1, len(section_parts), 2):
+        section_title = section_parts[part_index]
+        section_content = section_parts[part_index + 1].strip()
+        if section_content:
+            chunks.append(f"{section_title}\n{section_content}")
+            metadata_entries.append(
+                {"archivo": pdf_file.name, "seccion": section_title.strip()}
+            )
 
-    print(f"{archivo.name}: {chunks_archivo} chunks")
-
-print(f"Total de chunks creados: {len(chunks)}")
-
-kb = KnowledgeBase()
-for i in range(len(chunks)):
-    kb.add_knowledge(
-        knowledge_id=f"doc_{i}",
-        knowledge_text=chunks[i],
-        metadata=metadatas[i],
+knowledge_base = KnowledgeBase()
+for chunk_index, chunk in enumerate(chunks):
+    knowledge_base.add_knowledge(
+        knowledge_id=f"doc_{chunk_index}",
+        knowledge_text=chunk,
+        metadata=metadata_entries[chunk_index],
     )

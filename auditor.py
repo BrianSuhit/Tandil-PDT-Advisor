@@ -1,30 +1,36 @@
 from database import KnowledgeBase
 from google import genai
-from models import AuditoriaPDT
+from google.genai.errors import APIError
+from models import PDTAudit
 
-
-class AuditorPDTService:
-    def __init__(self, model_name: str = "gemini-3.1-flash-lite"):
+class PDTAuditorService:
+    def __init__(self):
         self.client = genai.Client()
         self.kb = KnowledgeBase()
-        self.model_name = model_name
 
-    def auditar(self, descripcion_proyecto: str, n_contextos: int = 5) -> AuditoriaPDT:
-        contexto = self.kb.search_knowledge(query=descripcion_proyecto, n_results=n_contextos)
+    def audit(self, project_description: str, num_contexts: int = 5) -> PDTAudit:
+        context = self.kb.search_knowledge(query=project_description, n_results=num_contexts)
         
         augmented_prompt = (
-            f"Contexto Normativo: {contexto}\n"
-            f"Proyecto a Auditar: {descripcion_proyecto}"
+            f"Contexto Normativo: {context}\n"
+            f"Proyecto a Auditar: {project_description}"
         )
 
-        interaction = self.client.interactions.create(
-            model=self.model_name,
-            system_instruction="Actúa como experto en el Plan de Desarrollo Territorial de Tandil y responde usando el contexto proporcionado.",
-            input=augmented_prompt,
-            response_format={
-                "type": "text",
-                "mime_type": "application/json",
-                "schema": AuditoriaPDT.model_json_schema(),
-            },
-        )
-        return AuditoriaPDT.model_validate_json(interaction.output_text)
+        try:
+            interaction = self.client.interactions.create(
+                model="gemini-3.1-flash-lite",
+                system_instruction="Actúa como experto en el Plan de Desarrollo Territorial de Tandil y responde usando el contexto proporcionado.",
+                input=augmented_prompt,
+                response_format={
+                    "type": "text",
+                    "mime_type": "application/json",
+                    "schema": PDTAudit.model_json_schema(),
+                },
+            )
+            return PDTAudit.model_validate_json(interaction.output_text)
+        except APIError as error:
+            print(f"Error de API en PDTAuditorService: {error}")
+            raise
+        except Exception as error:
+            print(f"Error inesperado en PDTAuditorService: {error}")
+            raise

@@ -16,9 +16,16 @@ class KnowledgeBase:
     
     def search_knowledge(self, query: str, n_results: int = 2):
         """Busca textos similares en la base vectorial."""
+        if self.collection.count() == 0:
+            raise RuntimeError(
+                "La base de conocimiento está vacía. Ejecuta index_pdfs.py antes de auditar."
+            )
+
         results = self.collection.query(
             query_texts=[query],
             n_results=n_results
         )
-        docs = results['documents'][0] 
-        return "\n".join(docs)
+        documents = results["documents"]
+        if not documents or not documents[0]:
+            raise RuntimeError("La búsqueda no devolvió documentos de la base.")
+        return "\n".join(documents[0])

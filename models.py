@@ -1,17 +1,21 @@
 from pydantic import BaseModel, Field
 
 
-class AuditoriaPDT(BaseModel):
-    es_compatible: bool = Field(
+class PDTAudit(BaseModel):
+    is_compatible: bool = Field(
+        alias="es_compatible",
         description="True si cumple la normativa, False si la infringe o requiere excepción."
     )
-    articulo_infringido: str | None = Field(
+    violated_article: str | None = Field(
         default=None,
+        alias="articulo_infringido",
         description="Artículo o sección que se infringe (ej: 'I.1', 'II.7'), o None si es compatible.",
     )
-    motivo: str = Field(
+    reason: str = Field(
+        alias="motivo",
         description="Explicación concisa y técnica de por qué es compatible o qué restricción viola según el contexto."
     )
-    recomendaciones: list[str] = Field(
+    recommendations: list[str] = Field(
+        alias="recomendaciones",
         description="Pasos a seguir o ajustes para adecuarse a la norma."
     )
