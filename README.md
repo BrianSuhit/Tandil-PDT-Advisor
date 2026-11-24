@@ -57,7 +57,7 @@ Cosas que no forman parte de este prototipo pero que son el paso siguiente para 
 
 ## Estructura del Proyecto
 ```text
-ecotandil-ecotips/
+ecotandil-Auditor/
 ├── app.py            # Interfaz de usuario con Streamlit
 ├── auditor.py        # Servicio desacoplado para interactuar con Gemini
 ├── database.py       # Conexión, cliente y consultas vectoriales en ChromaDB
