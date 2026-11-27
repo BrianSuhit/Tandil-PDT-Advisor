@@ -26,20 +26,20 @@ Como policía entiendo la importancia de la formalidad, la precisión legal y de
 Para este prototipo me enfoqué en lograr rigor normativo sin perder velocidad, asumiendo los siguientes compromisos técnicos:
 
 **RAG con ChromaDB (en vez de pasar todo el PDF en la ventana de contexto):**
--  *Pro:* Armé un script (index_pdfs.py) que corta la ordenanza respetando artículos y números romanos, y le mete metadatos (`archivo`, `seccion`) a ChromaDB. Así el modelo recupera artículos enteros con su contexto legal y no pedazos rotos.
--  *Contra:* Si el PDF cambia de formato o mete anexos con otra estructura, los regex pueden saltear secciones.
+-  ✅ *Pro:* Armé un script (index_pdfs.py) que corta la ordenanza respetando artículos y números romanos, y le mete metadatos (`archivo`, `seccion`) a ChromaDB. Así el modelo recupera artículos enteros con su contexto legal y no pedazos rotos.
+-  ❌ *Contra:* Si el PDF cambia de formato o mete anexos con otra estructura, los regex pueden saltear secciones.
 
 **Salida estrictamente estructurada en vez de texto libre:**
--  *Pro:* Garantiza un contrato de datos formal (dictamen de viabilidad, artículos específicos citados, justificación técnica y recomendaciones de adecuación). Esto permite renderizar en Streamlit tarjetas visuales limpias, ordenadas y sin respuestas vagas.
--  *Contra:* Mayor rigidez. Si una propuesta urbanística cae en una "zona gris" o un vacío normativo de la ordenanza, el modelo está obligado a encajar su análisis en campos predefinidos. Ademas puede generar errores si una persona ingresa un proyecto con requisitos contrapuestos o intenta validar mas de uno a la vez.
+-  ✅ *Pro:* Garantiza un contrato de datos formal (dictamen de viabilidad, artículos específicos citados, justificación técnica y recomendaciones de adecuación). Esto permite renderizar en Streamlit tarjetas visuales limpias, ordenadas y sin respuestas vagas.
+-  ❌ *Contra:* Mayor rigidez. Si una propuesta urbanística cae en una "zona gris" o un vacío normativo de la ordenanza, el modelo está obligado a encajar su análisis en campos predefinidos. Ademas puede generar errores si una persona ingresa un proyecto con requisitos contrapuestos o intenta validar mas de uno a la vez.
 
 **Guardrails previos (en vez de mandar cualquier texto directo al RAG):**
--  *Pro:* Filtran entradas maliciosas, intentos de inyección de prompt o consultas totalmente ajenas al urbanismo y la construcción antes de tocar la base vectorial o gastar llamadas a la API de Gemini.
--  *Contra:* Añaden una pequeña latencia al inicio del flujo al tener que evaluar la consulta antes de proceder a la auditoría. El guardrails deberia refactorizarse por uno mas robusto o un framework especifico en produccion.
+-  ✅ *Pro:* Filtran entradas maliciosas, intentos de inyección de prompt o consultas totalmente ajenas al urbanismo y la construcción antes de tocar la base vectorial o gastar llamadas a la API de Gemini.
+-  ❌ *Contra:* Añaden una pequeña latencia al inicio del flujo al tener que evaluar la consulta antes de proceder a la auditoría. El guardrails deberia refactorizarse por uno mas robusto o un framework especifico en produccion.
 
 **Modelo rápido (Gemini 2.5 Flash-Lite) vs. Modelo de frontera:**
-- *Pro:* Respuestas en pocos segundos y costo casi nulo para iterar y validar este MVP.
-- *Contra:* Para auditar normativas complejas en producción real no alcanza con un modelo liviano: se necesitaría un modelo de frontera con alto nivel de razonamiento (*thinking*) o una arquitectura con un segundo evaluador (*LLM-as-a-judge*) para verificar que el dictamen no tenga fallas lógicas antes de mostrarlo.
+- ✅ *Pro:* Respuestas en pocos segundos y costo casi nulo para iterar y validar este MVP.
+- ❌ *Contra:* Para auditar normativas complejas en producción real no alcanza con un modelo liviano: se necesitaría un modelo de frontera con alto nivel de razonamiento (*thinking*) o una arquitectura con un segundo evaluador (*LLM-as-a-judge*) para verificar que el dictamen no tenga fallas lógicas antes de mostrarlo.
 
 ## Mejoras a futuro
 Cosas que no forman parte de este prototipo pero que son el paso siguiente para llevarlo a la práctica:
