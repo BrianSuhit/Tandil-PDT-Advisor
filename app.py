@@ -4,6 +4,10 @@ from auditor import PDTAuditorService
 from guardrails import Guardrails
 
 
+@st.cache_resource
+def get_auditor() -> PDTAuditorService:
+    return PDTAuditorService()
+
 def main():
     st.title("🌿 EcoTandil - Auditor")
     st.write(
@@ -29,7 +33,7 @@ def main():
             st.error(f"🛑 RECHAZADO: {validation_error}")
             return
 
-        auditor = PDTAuditorService()
+        auditor = get_auditor()
         with st.spinner("Procesando auditoría..."):
             result = auditor.audit(project_description)
 
@@ -41,6 +45,5 @@ def main():
         st.write("**Recomendaciones:**")
         for recommendation in result.recommendations:
             st.write(f"- {recommendation}")
-
 
 main()
